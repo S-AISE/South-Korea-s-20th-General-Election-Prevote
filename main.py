@@ -62,67 +62,63 @@ def CalculateMatchRate(a):
     return min(a.in_prevoteRate, a.out_prevoteRate) / max(a.in_prevoteRate, a.out_prevoteRate)
 
 
-#불러올 엑셀 파일 이름
-'''file_region_list = ["강원", "경기", "경남", "경북", "광주", "대구",
-                    "대전", "부산", "서울", "세종", "울산", "인천",
-                    "전남", "전북", "제주", "충남", "충북"]
-
-for i in range(len(file_region_list)):
-    file_name = "지역구\\20대총선지역구(" + file_region_list[i] + ").xlsx"
-    rb = openpyxl.load_workbook(file_name)
-    file_sheet_names = rb.sheetnames
-
-'''
-
-#일단 서울만 해본다
-file_name = "지역구\\20대총선지역구(서울).xlsx"
-file = openpyxl.load_workbook(file_name)
-file_sheet_names = file.sheetnames
-
-
 candidateList = []
 candidate = [0,0]
 result = [["지역구", "정당", "후보자명", "관내 사전득표수", "관외 사전득표수",
           "관내 사전득표율", "관외 사전득표율", "일치율"]]
-init = 0
-cnt = 0
 
-for sheet_name in file_sheet_names:
-    sheet = file[sheet_name]
-    for i in sheet.rows:
-        for j in range(len(candidate)):
-            column = string.ascii_uppercase[4 + j]
 
-            #지역마다 후보자 정보 입력        
-            if i[0].value != None and i[0].value != "선거구명":
-                cnt += 1
+#불러올 엑셀 파일 이름
+file_region_list = ["강원", "경기", "경남", "경북", "광주", "대구",
+                    "대전", "부산", "서울", "세종", "울산", "인천",
+                    "전남", "전북", "제주", "충남", "충북"]
 
-                if cnt > 2 and j != 1:
-                    #candidate[0].PrintCandidateInfo()
-                    candidateList.append([candidate[0], candidate[1]])
+for r in range(len(file_region_list)):
+    file_name = "지역구\\20대총선지역구(" + file_region_list[r] + ").xlsx"
+    file = openpyxl.load_workbook(file_name)
+    file_sheet_names = file.sheetnames
 
-                party_cellname = column + str(i[0].row - 2)
-                name_cellname = column + str(i[0].row - 1)
 
-                region = i[0].value
-                party = sheet[party_cellname].value
-                name = sheet[name_cellname].value
+    for sheet_name in file_sheet_names:
+        sheet = file[sheet_name]
+        cnt = 0
+
+        if sheet_name == "통영고성":
+            continue
+
+        for i in sheet.rows:
+            for j in range(len(candidate)):
+                column = string.ascii_uppercase[4 + j]
+
+                #지역마다 후보자 정보 입력         
+                if i[0].value != None and i[0].value != "선거구명":
+                    cnt += 1
+
+                    if cnt > 2 and j != 1:
+                        candidateList.append([candidate[0], candidate[1]])
+                    
+                    party_cellname = column + str(i[0].row - 2)
+                    name_cellname = column + str(i[0].row - 1)
+
+                    region = i[0].value
+                    party = sheet[party_cellname].value
+                    name = sheet[name_cellname].value
     
-                candidate[j] = Candidate(region, party, name)
+                    candidate[j] = Candidate(region, party, name)
 
-            #관내 사전투표 총합
-            if i[1].value == "관내사전투표":
-                in_cellname = column + str(i[1].row)
-                in_prevote = sheet[in_cellname].value
+                #관내 사전투표 총합
+                if i[1].value == "관내사전투표":
+                    in_cellname = column + str(i[1].row)
+                    in_prevote = sheet[in_cellname].value
 
-                candidate[j].InputInPrevote(in_prevote)
+                    candidate[j].InputInPrevote(in_prevote)
             
-            #관외 사전투표 총합
-            if i[1].value == "관외사전투표":
-                out_cellname = column + str(i[1].row)
-                out_prevote = sheet[out_cellname].value
+                #관외 사전투표 총합
+                if i[1].value == "관외사전투표":
+                    out_cellname = column + str(i[1].row)
+                    out_prevote = sheet[out_cellname].value
 
-                candidate[j].InputOutPrevote(out_prevote)
+                    candidate[j].InputOutPrevote(out_prevote)
 
 
         
